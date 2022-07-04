@@ -7,7 +7,9 @@ Study Guide / Notes created Exam Objectives: https://www.redhat.com/en/services/
 
 ### Use the command-line interface to manage and configure an OpenShift cluster
 ### Use the web console to manage and configure an OpenShift cluster
-## Create and delete projects
+### Create and delete projects
+
+
 ### Import, export, and configure Kubernetes resources
 ### Examine resources and cluster status
 ### View logs
