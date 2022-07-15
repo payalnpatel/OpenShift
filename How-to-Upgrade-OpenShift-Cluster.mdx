@@ -1,0 +1,115 @@
+# How to Upgrade an OpenShift Cluster
+
+There are two ways to upgrade an OpenShift Container Platform (OCP) cluster - via the command-line interface (CLI) or via the OCP Web Console.  Below are steps on how to upgrade an OpenShift cluster, using one of the two methods.
+
+
+## Determine the Update Path
+Before upgrading a cluster, use the [Red Hat OpenShift Container Platform Update Graph](https://access.redhat.com/labs/ocpupgradegraph/update_path) to determine the best update path. The update path shows the steps to upgrade from one OCP version to another.
+
+This tool requires a few parameters to determine the best update path, as seen in the image below.
+
+![image](https://user-images.githubusercontent.com/35014868/179124128-223d7b26-e449-4744-9737-9a634f417279.png)
+
+Note: To use this tool, you'll need to sign up for a free Red Hat account.
+
+The <b>Current Channel</b> can be retrieved from the OCP web console homepage, or using the CLI with the below command.
+```
+oc get clusterversion -o jsonpath='{.items[].spec.channel}{"\n"}'
+```
+
+<b>Channels</b> recommend the release versions for cluster upgrades. These channels are tied to minor versions of OCP. When performing an upgrade, you may need to switch channels before upgrading to the desired OpenShift version.
+
+Upgrade channels can be classified as one of the following types:
+- <i>Fast Channel</i> - Fast channels are updated with new versions as soon as Red Hat declares the given version as a general availability release
+- <i>Stable Channel</i> - Stable channels contain releases as soon as their errata are published, releases are added to the stable channel after a delay
+- <i>EUS (Extended Updated Support) Channel</i> - EUS channels extend the maintenance phase for customers with Premium Subscription
+
+Select the appropriate channel type based on your requirements.
+
+The <b>Current OpenShift Version</b> and the <b>Target OpenShift Version</b> parameters specify the major and minor version.
+
+The current OpenShift version can be found on the OCP web console homepage, or retrieved with the below command
+```
+oc get clusterversion
+```
+
+For the <b>Target OpenShift Version</b> parameter, specify the version you wish to upgrade the cluster to.
+
+<b>Note: Before upgrading the cluster version, make sure to check version compatibility with the services running on the cluster to prevent compatibility issues post-upgrade.</b>
+
+Once you've entered in the required parameters, select <i>Generate</i> and a upgrade path will appear.
+
+![image](https://user-images.githubusercontent.com/35014868/179124402-4d3e1a9e-6abf-4c70-87e8-3c7ff2d38389.png)
+
+In the above image, you'll see that before upgrading to 4.5.35, the cluster needs to be upgraded to another 4.4 minor version. This is important to note, especially if the cluster needs to be a specific version. Certain versions can only upgrade to specific versions in another channel, so make sure to check the upgrade path beforehand!
+
+## Option 1: Upgrade the cluster via the CLI
+
+Before updating the cluster version, perform the followings steps to check cluster health.
+
+To view the current cluster version:
+```
+oc get clusterversion
+```
+
+To check the status of the cluster operators:
+```
+oc get clusteroperators
+```
+
+To check the status of the nodes in the cluster:
+```
+oc get nodes -o wide
+```
+
+To upgrade the cluster, use the following patch command, replacing the channel, current version, and target version values as needed.
+```
+oc patch clusterversion -p '{"spec": {"channel":"[channel-name]"}}' [current-version]-> [target-version]
+```
+
+Below is an example of the above patch command, for upgrading a cluster from 4.3.13 to 4.3.18.
+```
+oc patch clusterversion -p '{"spec": {"channel":"stable-4.3"}}' 4.3.13 -> 4.3.18
+```
+
+The amount of time needed to upgrade can vary between clusters, depending on the number of master and worker nodes.
+
+To check the status of the cluster upgrade, run the below command
+```
+oc get clusterversion
+```
+
+Before performing tasks on the cluster, or upgrading to a new version, check the status of the nodes. All nodes should be in <i>Ready</i> status, before proceeding. If a node is not ready, the status may appear as <i>'NotReady, SchedulingDisabled'</i>.
+```
+oc get nodes
+```
+
+The machineconfigpool (mcp) also provides the status of the master and worker nodes in the cluster. The below command displays the status of the machineconfigpools in the cluster. The master and worker machine config pools should have an Updated status of True before proceeding.
+```
+oc get mcp
+```
+
+## Option 2: Upgrade the cluster via the OCP web console
+
+The OpenShift Web Console is a user interface (UI) that is accessible through a web browser. Users can upgrade the cluster via the UI.
+
+To upgrade the OpenShift version, select <i>View settings</i> under <i>Cluster Details</i> on the Homepage.
+![image](https://user-images.githubusercontent.com/35014868/179124767-585a1a67-53b2-4ba2-b530-08d516013eba.png)
+
+
+Here we can see the current version of this cluster is 4.6.42.
+![image](https://user-images.githubusercontent.com/35014868/179124778-d3135fb4-ecea-4051-a6d8-8d459f568641.png)
+
+To upgrade the cluster to another minor version of 4.6, select the <i>Update</i> button, and the next desired version.
+![image](https://user-images.githubusercontent.com/35014868/179124803-e19f7a1f-1d6c-443c-93f3-9a735a517861.png)
+
+If you want to upgrade the cluster to a different major version, i.e. 4.6 -> 4.7, then select the edit icon next to the channel name, and the channel specifying the major version you are looking to upgrade to. Once you switch the channel, select <i>Update</i> again, and specify the minor version to upgrade to.
+
+![image](https://user-images.githubusercontent.com/35014868/179124836-c2c5968d-6f59-472e-8e5f-b053c46e676d.png)
+
+<b>Note: After switching channels, you may need to refresh the page in order for the available versions to appear when selecting the Update button.</b>
+
+The status will display on the homepage and on the <i>Cluster Settings</i> page. Once the cluster version has updated, you can upgrade to another version, or proceed with other tasks on your cluster.
+
+## Conclusion
+Upgrading an OpenShift cluster only takes a few steps, whether using the CLI or the OCP Web Console. Before upgrading a cluster, make sure to determine the best upgrade path! The time needed to upgrade a cluster varies based on the number of machines in the cluster. 
