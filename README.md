@@ -1,9 +1,7 @@
 # OpenShift
 
-
-
 ## Overview
-
+This repository contains notes and resources related to Red Hat OpenShift, a cloud-based Kubernetes platform
 
 
 ## Helpful Resources
